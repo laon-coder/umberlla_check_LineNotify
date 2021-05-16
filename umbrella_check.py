@@ -100,17 +100,16 @@ def set_weather_daily_info(weather_json_d):
     tempMax = round(weather_json_d["daily"][0]["temp"]["max"],1) # 최고기온
     tempMin = round(weather_json_d["daily"][0]["temp"]["min"],1) # 최저기온
     clouds = round(weather_json_d["daily"][0]["clouds"]) # 흐림, %
-    dailyPop = weather_json_d["daily"][0]["pop"] # 강수확률(0 or 1)
+    dailyPop = str(weather_json_d["daily"][0]["pop"]) # 강수확률
     
     temper = '\n' + '최고기온 : ' + str(tempMax) + '°C' + '\n' + '최저기온 : ' + str(tempMin) + '°C' + '\n' 
-    
+
     if (clouds <= 20):
         umbrella_chk = '\n' + '잠깐, 햇빛이 뜨거워요!☀️' + '\n' + '양산을 챙기세요🌂'
     else :
-        if (dailyPop > 0.0 and 'rain' in weather_json_d["daily"][0]):
-            rain = weather_json_d["daily"][0]["rain"] # 강수량　
-            if (rain > 0.0):
-                umbrella_chk = '\n' + '비 예보가 있어요🌦️' + '\n' + '우산을 챙기세요☔' + '\n' + '(예상 강수량 : ' + rain + '㎜)'
+        if (dailyPop is not 0 and 'rain' in str(weather_json_d["daily"][0])):
+            rain = str(weather_json_d["daily"][0]["rain"]) # 강수량　
+            umbrella_chk = '\n' + '비 예보가 있어요🌦️' + '\n' + '우산을 챙기세요☔' + '\n' + '(예상 강수량 : ' + rain + '㎜)'
         else :
             umbrella_chk = '\n' + '비 예보가 없어요.' 
     
@@ -121,7 +120,7 @@ def set_weather_daily_info(weather_json_d):
 def final_text():
     final_msgs = '\n'.join(msgs)
     print(final_msgs)
-    send_weather_info(final_msgs)
+    # send_weather_info(final_msgs)
 
 def send_weather_info(final_msgs):
     
