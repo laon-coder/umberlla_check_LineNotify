@@ -7,17 +7,15 @@ import urllib.parse
 import urllib.request
 import datetime
 import os
-# import datetime
 from datetime import datetime
 
 WEATHER_API_KEY = os.environ.get("WEATHER_API_KEY")
 LINE_TOKEN = os.environ.get("LINE_NOTIFY_API_KEY")
-city_name = "tokyo"
 lat = str(35.6895)
 lon = str(139.6917)
 
 # weather api
-WEATHER_URL_3h = "http://api.openweathermap.org/data/2.5/forecast?q=" + city_name + "&appid=" + WEATHER_API_KEY
+WEATHER_URL_3h = "http://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&appid=" + WEATHER_API_KEY
 WEATHER_URL_DAILY = "http://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&exclude=current,minutely,hourly,alerts&appid=" + WEATHER_API_KEY + "&units=metric"
 
 # LINE notify api
@@ -26,10 +24,9 @@ LINE_NOTIFY_URL="https://notify-api.line.me/api/notify"
 info_3h_list = []
 info_3h = []
 timestamp_hhmm = []
-list_msg_h3 = []
-timestamp = []
 msgs = []
 
+#  get 3시간 단위 날씨정보 취득
 def get_weather_3h_info():
     try:
         url = WEATHER_URL_3h
@@ -40,6 +37,7 @@ def get_weather_3h_info():
         sys.exit(1)
     return html_json
 
+#  get 데일리 날씨정보 취득
 def get_weather_daily_info():
     try:
         url_d = WEATHER_URL_DAILY
@@ -50,6 +48,7 @@ def get_weather_daily_info():
         sys.exit(1)
     return weather_json_d
 
+#  set 3시간 날씨 정보 
 def set_weather_3h_info(weather_json):
     lat = weather_json["city"]["coord"]["lat"]
     lon = weather_json["city"]["coord"]["lon"]
@@ -65,9 +64,11 @@ def set_weather_3h_info(weather_json):
 
     start_weatherforecast(info_3h)
 
+    # 메세지 헤더
     msg_header = '\n' + timestamp_today + ' ' + city_name + ' 날씨'
     msgs.append(msg_header)
 
+#  날씨 코드 한국어 변환 
 def start_weatherforecast(info_3h):
     for x in range(len(info_3h)):
         weather_3h = 0
@@ -91,11 +92,13 @@ def start_weatherforecast(info_3h):
             weather_3h = '안개🌫️'
         info_3h_list.append(weather_3h) 
 
+# 3시간 날씨 메세지
 def text_edit():
     for z in range(len(info_3h_list)):
         msg_3h = '\n' + timestamp_hhmm[0] + ' ' + info_3h_list[0] + '\n' + timestamp_hhmm[1] + ' ' + info_3h_list[1] + '\n'+ timestamp_hhmm[2] + ' ' + info_3h_list[2] + '\n'+ timestamp_hhmm[3] + ' ' + info_3h_list[3] + '\n'+ timestamp_hhmm[4] + ' ' + info_3h_list[4] + '\n' + timestamp_hhmm[5] + ' ' + info_3h_list[5] + '\n'
     msgs.append(msg_3h)
 
+#  set 데일리 날씨 정보 
 def set_weather_daily_info(weather_json_d):
     tempMax = round(weather_json_d["daily"][0]["temp"]["max"],1) # 최고기온
     tempMin = round(weather_json_d["daily"][0]["temp"]["min"],1) # 최저기온
@@ -103,7 +106,8 @@ def set_weather_daily_info(weather_json_d):
     dailyPop = str(weather_json_d["daily"][0]["pop"]) # 강수확률
     
     temper = '\n' + '최고기온 : ' + str(tempMax) + '°C' + '\n' + '최저기온 : ' + str(tempMin) + '°C' + '\n' 
-
+    
+    # 우산 알림 정보 
     if (clouds <= 20):
         umbrella_chk = '\n' + '잠깐, 햇빛이 뜨거워요!☀️' + '\n' + '양산을 챙기세요🌂'
     else :
@@ -113,15 +117,17 @@ def set_weather_daily_info(weather_json_d):
         else :
             umbrella_chk = '\n' + '비 예보가 없어요.' 
     
+    # 우산알림 메세지
     msg_d = temper + umbrella_chk
-    
     msgs.append(msg_d)
-  
+
+# 송신 메세지 세팅
 def final_text():
     final_msgs = '\n'.join(msgs)
     print(final_msgs)
-    # send_weather_info(final_msgs)
+    send_weather_info(final_msgs)
 
+# line notify 메세지 
 def send_weather_info(final_msgs):
     
     method = "POST"
